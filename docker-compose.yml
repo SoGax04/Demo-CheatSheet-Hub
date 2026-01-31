@@ -1,0 +1,79 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-cheatsheet}
+      POSTGRES_USER: ${POSTGRES_USER:-cheatsheet}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cheatsheet}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/00-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  cache:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  directus:
+    image: ${DIRECTUS_IMAGE:-directus/directus:11.5.1}
+    restart: unless-stopped
+    ports:
+      - "8055:8055"
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+    environment:
+      SECRET: ${DIRECTUS_SECRET:-dev-secret-change-me}
+
+      DB_CLIENT: "pg"
+      DB_HOST: "db"
+      DB_PORT: "5432"
+      DB_DATABASE: ${POSTGRES_DB:-cheatsheet}
+      DB_USER: ${POSTGRES_USER:-cheatsheet}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-cheatsheet}
+
+      CACHE_ENABLED: "true"
+      CACHE_STORE: "redis"
+      CACHE_AUTO_PURGE: "true"
+      REDIS: "redis://cache:6379"
+
+      ADMIN_EMAIL: ${DIRECTUS_ADMIN_EMAIL:-admin@example.com}
+      ADMIN_PASSWORD: ${DIRECTUS_ADMIN_PASSWORD:-change-me-please}
+
+      WEBSOCKETS_ENABLED: "true"
+      CORS_ENABLED: "true"
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+      PUBLIC_URL: ${PUBLIC_URL:-http://localhost:8055}
+
+      # Google OAuth
+      AUTH_PROVIDERS: ${AUTH_PROVIDERS:-}
+      AUTH_GOOGLE_DRIVER: "openid"
+      AUTH_GOOGLE_CLIENT_ID: ${AUTH_GOOGLE_CLIENT_ID:-}
+      AUTH_GOOGLE_CLIENT_SECRET: ${AUTH_GOOGLE_CLIENT_SECRET:-}
+      AUTH_GOOGLE_ISSUER_URL: "https://accounts.google.com"
+      AUTH_GOOGLE_IDENTIFIER_KEY: "email"
+      AUTH_GOOGLE_ICON: "google"
+      AUTH_GOOGLE_LABEL: "Google"
+      AUTH_GOOGLE_ALLOW_PUBLIC_REGISTRATION: ${AUTH_GOOGLE_ALLOW_PUBLIC_REGISTRATION:-false}
+      AUTH_GOOGLE_DEFAULT_ROLE_ID: ${AUTH_GOOGLE_DEFAULT_ROLE_ID:-}
+    volumes:
+      - ./directus/uploads:/directus/uploads
+      - ./directus/extensions:/directus/extensions
+
+volumes:
+  db_data:
+  redis_data:

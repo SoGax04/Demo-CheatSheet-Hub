@@ -1,0 +1,740 @@
+version: 1
+directus: 11.5.1
+collections:
+  - collection: categories
+    meta:
+      collection: categories
+      icon: folder
+      note: "Categories for cheatsheets (Language, Framework, DB, CLI, etc.)"
+      hidden: false
+      singleton: false
+      translations: null
+      accountability: all
+      sort_field: sort
+    schema:
+      name: categories
+
+  - collection: tags
+    meta:
+      collection: tags
+      icon: label
+      note: "Tags for cheatsheets (multiple tags can be attached)"
+      hidden: false
+      singleton: false
+      translations: null
+      accountability: all
+      sort_field: null
+    schema:
+      name: tags
+
+  - collection: cheatsheets
+    meta:
+      collection: cheatsheets
+      icon: description
+      note: "Cheatsheet entries"
+      hidden: false
+      singleton: false
+      translations: null
+      accountability: all
+      sort_field: null
+      archive_field: status
+      archive_value: archived
+      unarchive_value: draft
+    schema:
+      name: cheatsheets
+
+  - collection: cheatsheets_tags
+    meta:
+      collection: cheatsheets_tags
+      icon: import_export
+      note: "Junction table for cheatsheets and tags (M2M)"
+      hidden: true
+      singleton: false
+      translations: null
+      accountability: all
+    schema:
+      name: cheatsheets_tags
+
+  - collection: cheatsheets_related
+    meta:
+      collection: cheatsheets_related
+      icon: link
+      note: "Junction table for related cheatsheets (M2M self-reference)"
+      hidden: true
+      singleton: false
+      translations: null
+      accountability: all
+    schema:
+      name: cheatsheets_related
+
+fields:
+  # Categories fields
+  - collection: categories
+    field: id
+    type: uuid
+    meta:
+      field: id
+      special:
+        - uuid
+      interface: input
+      readonly: true
+      hidden: true
+      width: full
+    schema:
+      name: id
+      is_primary_key: true
+      is_nullable: false
+      data_type: uuid
+      has_auto_increment: false
+
+  - collection: categories
+    field: name
+    type: string
+    meta:
+      field: name
+      interface: input
+      required: true
+      width: half
+    schema:
+      name: name
+      is_nullable: false
+      data_type: varchar
+      max_length: 255
+
+  - collection: categories
+    field: slug
+    type: string
+    meta:
+      field: slug
+      interface: input
+      required: true
+      width: half
+      note: "URL-friendly identifier"
+    schema:
+      name: slug
+      is_nullable: false
+      is_unique: true
+      data_type: varchar
+      max_length: 255
+
+  - collection: categories
+    field: description
+    type: text
+    meta:
+      field: description
+      interface: input-multiline
+      width: full
+    schema:
+      name: description
+      is_nullable: true
+      data_type: text
+
+  - collection: categories
+    field: sort
+    type: integer
+    meta:
+      field: sort
+      interface: input
+      hidden: true
+      width: half
+    schema:
+      name: sort
+      is_nullable: true
+      data_type: integer
+
+  - collection: categories
+    field: icon
+    type: string
+    meta:
+      field: icon
+      interface: select-icon
+      width: half
+    schema:
+      name: icon
+      is_nullable: true
+      data_type: varchar
+      max_length: 50
+
+  - collection: categories
+    field: date_created
+    type: timestamp
+    meta:
+      field: date_created
+      special:
+        - date-created
+      interface: datetime
+      readonly: true
+      hidden: true
+      width: half
+    schema:
+      name: date_created
+      is_nullable: true
+      data_type: timestamp with time zone
+
+  - collection: categories
+    field: date_updated
+    type: timestamp
+    meta:
+      field: date_updated
+      special:
+        - date-updated
+      interface: datetime
+      readonly: true
+      hidden: true
+      width: half
+    schema:
+      name: date_updated
+      is_nullable: true
+      data_type: timestamp with time zone
+
+  # Tags fields
+  - collection: tags
+    field: id
+    type: uuid
+    meta:
+      field: id
+      special:
+        - uuid
+      interface: input
+      readonly: true
+      hidden: true
+      width: full
+    schema:
+      name: id
+      is_primary_key: true
+      is_nullable: false
+      data_type: uuid
+      has_auto_increment: false
+
+  - collection: tags
+    field: name
+    type: string
+    meta:
+      field: name
+      interface: input
+      required: true
+      width: half
+    schema:
+      name: name
+      is_nullable: false
+      data_type: varchar
+      max_length: 255
+
+  - collection: tags
+    field: slug
+    type: string
+    meta:
+      field: slug
+      interface: input
+      required: true
+      width: half
+      note: "URL-friendly identifier"
+    schema:
+      name: slug
+      is_nullable: false
+      is_unique: true
+      data_type: varchar
+      max_length: 255
+
+  - collection: tags
+    field: color
+    type: string
+    meta:
+      field: color
+      interface: select-color
+      width: half
+    schema:
+      name: color
+      is_nullable: true
+      data_type: varchar
+      max_length: 20
+
+  - collection: tags
+    field: date_created
+    type: timestamp
+    meta:
+      field: date_created
+      special:
+        - date-created
+      interface: datetime
+      readonly: true
+      hidden: true
+      width: half
+    schema:
+      name: date_created
+      is_nullable: true
+      data_type: timestamp with time zone
+
+  # Cheatsheets fields
+  - collection: cheatsheets
+    field: id
+    type: uuid
+    meta:
+      field: id
+      special:
+        - uuid
+      interface: input
+      readonly: true
+      hidden: true
+      width: full
+    schema:
+      name: id
+      is_primary_key: true
+      is_nullable: false
+      data_type: uuid
+      has_auto_increment: false
+
+  - collection: cheatsheets
+    field: slug
+    type: string
+    meta:
+      field: slug
+      interface: input
+      required: true
+      width: half
+      note: "URL-friendly identifier (unique)"
+    schema:
+      name: slug
+      is_nullable: false
+      is_unique: true
+      data_type: varchar
+      max_length: 255
+
+  - collection: cheatsheets
+    field: title
+    type: string
+    meta:
+      field: title
+      interface: input
+      required: true
+      width: half
+    schema:
+      name: title
+      is_nullable: false
+      data_type: varchar
+      max_length: 255
+
+  - collection: cheatsheets
+    field: summary
+    type: text
+    meta:
+      field: summary
+      interface: input-multiline
+      width: full
+      note: "Brief summary of the cheatsheet"
+    schema:
+      name: summary
+      is_nullable: true
+      data_type: text
+
+  - collection: cheatsheets
+    field: body
+    type: text
+    meta:
+      field: body
+      interface: input-rich-text-md
+      width: full
+      note: "Main content in Markdown format"
+    schema:
+      name: body
+      is_nullable: true
+      data_type: text
+
+  - collection: cheatsheets
+    field: status
+    type: string
+    meta:
+      field: status
+      interface: select-dropdown
+      options:
+        choices:
+          - text: Draft
+            value: draft
+          - text: Published
+            value: published
+          - text: Archived
+            value: archived
+      required: true
+      width: half
+      default_value: draft
+    schema:
+      name: status
+      is_nullable: false
+      data_type: varchar
+      max_length: 20
+      default_value: draft
+
+  - collection: cheatsheets
+    field: category
+    type: uuid
+    meta:
+      field: category
+      interface: select-dropdown-m2o
+      special:
+        - m2o
+      width: half
+      note: "Category of the cheatsheet"
+    schema:
+      name: category
+      is_nullable: true
+      data_type: uuid
+      foreign_key_column: id
+      foreign_key_table: categories
+
+  - collection: cheatsheets
+    field: tags
+    type: alias
+    meta:
+      field: tags
+      interface: list-m2m
+      special:
+        - m2m
+      width: full
+      note: "Tags attached to this cheatsheet"
+
+  - collection: cheatsheets
+    field: target_name
+    type: string
+    meta:
+      field: target_name
+      interface: input
+      width: half
+      note: "Target technology name (e.g., Python, Git)"
+    schema:
+      name: target_name
+      is_nullable: true
+      data_type: varchar
+      max_length: 100
+
+  - collection: cheatsheets
+    field: target_version
+    type: string
+    meta:
+      field: target_version
+      interface: input
+      width: half
+      note: "Target version (optional)"
+    schema:
+      name: target_version
+      is_nullable: true
+      data_type: varchar
+      max_length: 50
+
+  - collection: cheatsheets
+    field: difficulty
+    type: string
+    meta:
+      field: difficulty
+      interface: select-dropdown
+      options:
+        choices:
+          - text: Beginner
+            value: beginner
+          - text: Intermediate
+            value: intermediate
+          - text: Advanced
+            value: advanced
+      width: half
+    schema:
+      name: difficulty
+      is_nullable: true
+      data_type: varchar
+      max_length: 20
+
+  - collection: cheatsheets
+    field: references
+    type: json
+    meta:
+      field: references
+      interface: list
+      special:
+        - cast-json
+      width: full
+      note: "Reference links array"
+      options:
+        fields:
+          - field: title
+            name: Title
+            type: string
+            meta:
+              interface: input
+              width: half
+          - field: url
+            name: URL
+            type: string
+            meta:
+              interface: input
+              width: half
+    schema:
+      name: references
+      is_nullable: true
+      data_type: json
+
+  - collection: cheatsheets
+    field: related_cheatsheets
+    type: alias
+    meta:
+      field: related_cheatsheets
+      interface: list-m2m
+      special:
+        - m2m
+      width: full
+      note: "Related cheatsheets (self-reference)"
+
+  - collection: cheatsheets
+    field: seo_description
+    type: text
+    meta:
+      field: seo_description
+      interface: input-multiline
+      width: full
+      note: "SEO meta description"
+    schema:
+      name: seo_description
+      is_nullable: true
+      data_type: text
+
+  - collection: cheatsheets
+    field: og_image
+    type: uuid
+    meta:
+      field: og_image
+      interface: file-image
+      special:
+        - file
+      width: half
+      note: "Open Graph image"
+    schema:
+      name: og_image
+      is_nullable: true
+      data_type: uuid
+      foreign_key_column: id
+      foreign_key_table: directus_files
+
+  - collection: cheatsheets
+    field: user_created
+    type: uuid
+    meta:
+      field: user_created
+      special:
+        - user-created
+      interface: select-dropdown-m2o
+      readonly: true
+      hidden: true
+      width: half
+    schema:
+      name: user_created
+      is_nullable: true
+      data_type: uuid
+      foreign_key_column: id
+      foreign_key_table: directus_users
+
+  - collection: cheatsheets
+    field: user_updated
+    type: uuid
+    meta:
+      field: user_updated
+      special:
+        - user-updated
+      interface: select-dropdown-m2o
+      readonly: true
+      hidden: true
+      width: half
+    schema:
+      name: user_updated
+      is_nullable: true
+      data_type: uuid
+      foreign_key_column: id
+      foreign_key_table: directus_users
+
+  - collection: cheatsheets
+    field: date_created
+    type: timestamp
+    meta:
+      field: date_created
+      special:
+        - date-created
+      interface: datetime
+      readonly: true
+      hidden: true
+      width: half
+    schema:
+      name: date_created
+      is_nullable: true
+      data_type: timestamp with time zone
+
+  - collection: cheatsheets
+    field: date_updated
+    type: timestamp
+    meta:
+      field: date_updated
+      special:
+        - date-updated
+      interface: datetime
+      readonly: true
+      hidden: true
+      width: half
+    schema:
+      name: date_updated
+      is_nullable: true
+      data_type: timestamp with time zone
+
+  # Cheatsheets_tags junction table fields
+  - collection: cheatsheets_tags
+    field: id
+    type: integer
+    meta:
+      field: id
+      hidden: true
+    schema:
+      name: id
+      is_primary_key: true
+      is_nullable: false
+      data_type: integer
+      has_auto_increment: true
+
+  - collection: cheatsheets_tags
+    field: cheatsheets_id
+    type: uuid
+    meta:
+      field: cheatsheets_id
+      hidden: true
+    schema:
+      name: cheatsheets_id
+      is_nullable: true
+      data_type: uuid
+      foreign_key_column: id
+      foreign_key_table: cheatsheets
+
+  - collection: cheatsheets_tags
+    field: tags_id
+    type: uuid
+    meta:
+      field: tags_id
+      hidden: true
+    schema:
+      name: tags_id
+      is_nullable: true
+      data_type: uuid
+      foreign_key_column: id
+      foreign_key_table: tags
+
+  # Cheatsheets_related junction table fields (self-reference)
+  - collection: cheatsheets_related
+    field: id
+    type: integer
+    meta:
+      field: id
+      hidden: true
+    schema:
+      name: id
+      is_primary_key: true
+      is_nullable: false
+      data_type: integer
+      has_auto_increment: true
+
+  - collection: cheatsheets_related
+    field: cheatsheets_id
+    type: uuid
+    meta:
+      field: cheatsheets_id
+      hidden: true
+    schema:
+      name: cheatsheets_id
+      is_nullable: true
+      data_type: uuid
+      foreign_key_column: id
+      foreign_key_table: cheatsheets
+
+  - collection: cheatsheets_related
+    field: related_cheatsheets_id
+    type: uuid
+    meta:
+      field: related_cheatsheets_id
+      hidden: true
+    schema:
+      name: related_cheatsheets_id
+      is_nullable: true
+      data_type: uuid
+      foreign_key_column: id
+      foreign_key_table: cheatsheets
+
+relations:
+  # Category M2O relation
+  - collection: cheatsheets
+    field: category
+    related_collection: categories
+    meta:
+      one_field: cheatsheets
+      sort_field: null
+      one_deselect_action: nullify
+    schema:
+      on_delete: SET NULL
+
+  # Tags M2M relation
+  - collection: cheatsheets_tags
+    field: cheatsheets_id
+    related_collection: cheatsheets
+    meta:
+      one_field: tags
+      sort_field: null
+      one_deselect_action: nullify
+      junction_field: tags_id
+    schema:
+      on_delete: CASCADE
+
+  - collection: cheatsheets_tags
+    field: tags_id
+    related_collection: tags
+    meta:
+      one_field: null
+      sort_field: null
+      one_deselect_action: nullify
+      junction_field: cheatsheets_id
+    schema:
+      on_delete: CASCADE
+
+  # Related cheatsheets M2M self-reference
+  - collection: cheatsheets_related
+    field: cheatsheets_id
+    related_collection: cheatsheets
+    meta:
+      one_field: related_cheatsheets
+      sort_field: null
+      one_deselect_action: nullify
+      junction_field: related_cheatsheets_id
+    schema:
+      on_delete: CASCADE
+
+  - collection: cheatsheets_related
+    field: related_cheatsheets_id
+    related_collection: cheatsheets
+    meta:
+      one_field: null
+      sort_field: null
+      one_deselect_action: nullify
+      junction_field: cheatsheets_id
+    schema:
+      on_delete: CASCADE
+
+  # OG Image file relation
+  - collection: cheatsheets
+    field: og_image
+    related_collection: directus_files
+    meta:
+      sort_field: null
+    schema:
+      on_delete: SET NULL
+
+  # User created/updated relations
+  - collection: cheatsheets
+    field: user_created
+    related_collection: directus_users
+    schema:
+      on_delete: SET NULL
+
+  - collection: cheatsheets
+    field: user_updated
+    related_collection: directus_users
+    schema:
+      on_delete: SET NULL
